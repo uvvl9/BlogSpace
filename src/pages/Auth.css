@@ -1,0 +1,152 @@
+/* Auth Pages Styles */
+
+.auth-container {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-lg);
+    background: radial-gradient(ellipse at top, hsl(262, 83%, 15%) 0%, var(--color-bg) 50%);
+}
+
+.auth-card {
+    width: 100%;
+    max-width: 450px;
+    background: var(--color-bg-card);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-xl);
+    padding: var(--space-2xl);
+    box-shadow: var(--shadow-xl);
+}
+
+.auth-header {
+    text-align: center;
+    margin-bottom: var(--space-2xl);
+}
+
+.auth-header h1 {
+    font-size: var(--font-size-3xl);
+    margin-bottom: var(--space-sm);
+}
+
+.auth-header p {
+    color: var(--color-text-muted);
+    margin: 0;
+}
+
+.auth-form {
+    margin-bottom: var(--space-lg);
+}
+
+.auth-footer {
+    text-align: center;
+    padding-top: var(--space-lg);
+    border-top: 1px solid var(--color-border);
+}
+
+.auth-footer p {
+    margin: 0;
+    color: var(--color-text-secondary);
+}
+
+.auth-link {
+    color: var(--color-primary-light);
+    font-weight: 600;
+    transition: color var(--transition-fast);
+}
+
+.auth-link:hover {
+    color: var(--color-primary);
+    text-decoration: underline;
+}
+
+.w-full {
+    width: 100%;
+}
+
+/* Google Sign-In Button */
+.btn-google {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-md);
+    padding: var(--space-md) var(--space-lg);
+    background: white;
+    color: #3c4043;
+    border: 1px solid #dadce0;
+    border-radius: var(--radius-md);
+    font-size: var(--font-size-base);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--transition-base);
+    margin-bottom: var(--space-lg);
+}
+
+.btn-google:hover:not(:disabled) {
+    background: #f8f9fa;
+    box-shadow: 0 1px 3px rgba(60, 64, 67, 0.3);
+}
+
+.btn-google:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* Divider */
+.divider {
+    display: flex;
+    align-items: center;
+    margin: var(--space-xl) 0;
+    color: var(--color-text-muted);
+    font-size: var(--font-size-sm);
+}
+
+.divider::before,
+.divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--color-border);
+}
+
+.divider span {
+    padding: 0 var(--space-md);
+}
+
+/* Alert Styles */
+.alert {
+    padding: var(--space-md);
+    border-radius: var(--radius-md);
+    margin-bottom: var(--space-lg);
+    font-size: var(--font-size-sm);
+    animation: slideIn 0.3s ease;
+}
+
+.alert-error {
+    background: hsla(0, 84%, 60%, 0.1);
+    border: 1px solid var(--color-error);
+    color: var(--color-error);
+}
+
+.alert-success {
+    background: hsla(142, 71%, 45%, 0.1);
+    border: 1px solid var(--color-success);
+    color: var(--color-success);
+}
+
+.alert-info {
+    background: hsla(199, 89%, 48%, 0.1);
+    border: 1px solid var(--color-secondary);
+    color: var(--color-secondary-light);
+}
+
+@media (max-width: 768px) {
+    .auth-card {
+        padding: var(--space-lg);
+    }
+
+    .auth-header h1 {
+        font-size: var(--font-size-2xl);
+    }
+}

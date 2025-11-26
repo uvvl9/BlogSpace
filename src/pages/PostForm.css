@@ -1,0 +1,67 @@
+/* Post Form Styles (Create & Edit) */
+
+.post-form-page {
+    min-height: 100vh;
+    padding: var(--space-2xl) 0;
+    background: radial-gradient(ellipse at top,
+            hsl(262, 83%, 12%) 0%,
+            var(--color-bg) 50%);
+}
+
+.post-form-container {
+    max-width: 800px;
+    margin: 0 auto;
+    background: var(--color-bg-card);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-xl);
+    padding: var(--space-2xl);
+    box-shadow: var(--shadow-xl);
+}
+
+.form-header {
+    margin-bottom: var(--space-2xl);
+    padding-bottom: var(--space-lg);
+    border-bottom: 1px solid var(--color-border);
+}
+
+.form-header h1 {
+    font-size: var(--font-size-3xl);
+    margin-bottom: var(--space-sm);
+}
+
+.post-form .form-textarea {
+    min-height: 300px;
+    font-family: inherit;
+    line-height: 1.7;
+}
+
+.form-actions {
+    display: flex;
+    gap: var(--space-md);
+    justify-content: flex-end;
+    margin-top: var(--space-2xl);
+    padding-top: var(--space-lg);
+    border-top: 1px solid var(--color-border);
+}
+
+.required {
+    color: var(--color-error);
+}
+
+@media (max-width: 768px) {
+    .post-form-container {
+        padding: var(--space-lg);
+    }
+
+    .form-header h1 {
+        font-size: var(--font-size-2xl);
+    }
+
+    .form-actions {
+        flex-direction: column-reverse;
+    }
+
+    .form-actions button {
+        width: 100%;
+    }
+}

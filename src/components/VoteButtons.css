@@ -1,0 +1,67 @@
+/* Vote Buttons Styles */
+
+.vote-buttons {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-xs);
+    padding: var(--space-sm);
+}
+
+.vote-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: var(--space-xs);
+    color: var(--color-text-muted);
+    transition: all var(--transition-fast);
+    border-radius: var(--radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.vote-btn:hover:not(:disabled) {
+    background: var(--color-bg-hover);
+    transform: scale(1.1);
+}
+
+.vote-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.vote-btn.upvote.active {
+    color: var(--color-primary);
+}
+
+.vote-btn.upvote:hover:not(:disabled) {
+    color: var(--color-primary-light);
+}
+
+.vote-btn.downvote.active {
+    color: var(--color-error);
+}
+
+.vote-btn.downvote:hover:not(:disabled) {
+    color: var(--color-error);
+    opacity: 0.8;
+}
+
+.vote-count {
+    font-weight: 700;
+    font-size: var(--font-size-sm);
+    color: var(--color-text-primary);
+    min-width: 30px;
+    text-align: center;
+}
+
+/* Positive vote count */
+.vote-count.positive {
+    color: var(--color-primary);
+}
+
+/* Negative vote count */
+.vote-count.negative {
+    color: var(--color-error);
+}
