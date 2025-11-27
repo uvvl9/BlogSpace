@@ -99,8 +99,7 @@ const BlogPost = () => {
             await addComment(postId, {
                 text: commentText,
                 userId: currentUser.uid,
-                userName: currentUser.displayName || 'Anonymous',
-                userPhoto: currentUser.photoURL || null
+                userName: currentUser.displayName || 'Anonymous'
             });
             setCommentText('');
             await loadPostAndComments();
@@ -214,22 +213,29 @@ const BlogPost = () => {
                             {comments.length === 0 ? (
                                 <p className="no-comments">No comments yet. Be the first to comment!</p>
                             ) : (
-                                comments.map((comment) => (
-                                    <div key={comment.id} className="comment-item">
-                                        <img
-                                            src={comment.userPhoto || 'https://via.placeholder.com/40'}
-                                            alt={comment.userName}
-                                            className="comment-avatar"
-                                        />
-                                        <div className="comment-content">
-                                            <div className="comment-header">
-                                                <span className="comment-author">{comment.userName}</span>
-                                                <span className="comment-date">{formatDate(comment.createdAt)}</span>
+                                comments.map((comment) => {
+                                    // Use current user's photo if it's their comment, otherwise generate from userName
+                                    const avatarUrl = comment.userId === currentUser?.uid
+                                        ? currentUser.photoURL
+                                        : `https://api.dicebear.com/7.x/fun-emoji/svg?seed=${encodeURIComponent(comment.userName)}`;
+
+                                    return (
+                                        <div key={comment.id} className="comment-item">
+                                            <img
+                                                src={avatarUrl || 'https://api.dicebear.com/7.x/fun-emoji/svg?seed=default'}
+                                                alt={comment.userName}
+                                                className="comment-avatar"
+                                            />
+                                            <div className="comment-content">
+                                                <div className="comment-header">
+                                                    <span className="comment-author">{comment.userName}</span>
+                                                    <span className="comment-date">{formatDate(comment.createdAt)}</span>
+                                                </div>
+                                                <p className="comment-text">{comment.text}</p>
                                             </div>
-                                            <p className="comment-text">{comment.text}</p>
                                         </div>
-                                    </div>
-                                ))
+                                    );
+                                })
                             )}
                         </div>
                     </div>

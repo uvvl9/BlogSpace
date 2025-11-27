@@ -13,6 +13,7 @@ import {
     sendPasswordResetEmail
 } from 'firebase/auth';
 import { auth } from '../firebase.config';
+import { generateAvatarUrl } from '../services/avatarService';
 
 const AuthContext = createContext({});
 
@@ -29,15 +30,20 @@ export const AuthProvider = ({ children }) => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
-    // Register new user
+    // Register new user with email
     const register = async (email, password, displayName) => {
         try {
             setError(null);
             const userCredential = await createUserWithEmailAndPassword(auth, email, password);
 
-            if (displayName) {
-                await updateProfile(userCredential.user, { displayName });
-            }
+            // Generate random avatar for email users
+            const photoURL = generateAvatarUrl(email);
+
+            // Update profile with name and avatar
+            await updateProfile(userCredential.user, {
+                displayName,
+                photoURL
+            });
 
             return userCredential.user;
         } catch (err) {

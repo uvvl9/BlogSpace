@@ -7,7 +7,6 @@ import {
     getDocs,
     query,
     where,
-    orderBy,
     serverTimestamp
 } from 'firebase/firestore';
 import { db } from '../firebase.config';
@@ -34,8 +33,7 @@ export const getComments = async (postId) => {
     try {
         const commentsQuery = query(
             collection(db, COMMENTS_COLLECTION),
-            where('postId', '==', postId),
-            orderBy('createdAt', 'desc')
+            where('postId', '==', postId)
         );
         const querySnapshot = await getDocs(commentsQuery);
 
@@ -46,6 +44,13 @@ export const getComments = async (postId) => {
                 ...doc.data(),
                 createdAt: doc.data().createdAt?.toDate()
             });
+        });
+
+        // Sort in JavaScript instead of Firestore to avoid compound index
+        comments.sort((a, b) => {
+            if (!a.createdAt) return 1;
+            if (!b.createdAt) return -1;
+            return b.createdAt - a.createdAt;
         });
 
         return comments;

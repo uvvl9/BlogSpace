@@ -1,11 +1,11 @@
-// Settings Page with Profile Photo Upload
+// Settings Page with Avatar Selection
 // User account settings and profile management
 
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { updatePassword, updateProfile, deleteUser } from 'firebase/auth';
-import { uploadProfilePhoto } from '../services/storageService';
+import { generateAvatarUrl, generateAvatarOptions } from '../services/avatarService';
 import './Settings.css';
 
 const Settings = () => {
@@ -13,8 +13,9 @@ const Settings = () => {
     const navigate = useNavigate();
 
     const [displayName, setDisplayName] = useState(currentUser?.displayName || '');
-    const [photoFile, setPhotoFile] = useState(null);
-    const [photoPreview, setPhotoPreview] = useState(currentUser?.photoURL || '');
+    const [showAvatarPicker, setShowAvatarPicker] = useState(false);
+    const [avatarOptions, setAvatarOptions] = useState([]);
+    const [selectedAvatar, setSelectedAvatar] = useState(currentUser?.photoURL || '');
     const [newPassword, setNewPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
 
@@ -22,11 +23,38 @@ const Settings = () => {
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
 
-    const handlePhotoChange = (e) => {
-        const file = e.target.files[0];
-        if (file) {
-            setPhotoFile(file);
-            setPhotoPreview(URL.createObjectURL(file));
+    const handleEditAvatar = () => {
+        // Generate 6 avatar options
+        const options = generateAvatarOptions(currentUser.email || currentUser.uid, 6);
+        setAvatarOptions(options);
+        setShowAvatarPicker(true);
+    };
+
+    const handleGenerateRandomAvatar = async () => {
+        setLoading(true);
+        try {
+            const randomAvatar = generateAvatarUrl(Date.now().toString());
+            await updateProfile(currentUser, { photoURL: randomAvatar });
+            setSelectedAvatar(randomAvatar);
+            setSuccess('Avatar updated successfully!');
+        } catch (err) {
+            setError('Failed to update avatar: ' + err.message);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleSelectAvatar = async (avatarUrl) => {
+        setSelectedAvatar(avatarUrl);
+        setLoading(true);
+        try {
+            await updateProfile(currentUser, { photoURL: avatarUrl });
+            setSuccess('Avatar updated successfully!');
+            setShowAvatarPicker(false);
+        } catch (err) {
+            setError('Failed to update avatar: ' + err.message);
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -37,22 +65,8 @@ const Settings = () => {
         setLoading(true);
 
         try {
-            let photoURL = currentUser.photoURL;
-
-            // Upload photo if selected
-            if (photoFile) {
-                const result = await uploadProfilePhoto(currentUser.uid, photoFile);
-                photoURL = result.photoURL;
-            }
-
-            // Update profile
-            await updateProfile(currentUser, {
-                displayName,
-                photoURL
-            });
-
+            await updateProfile(currentUser, { displayName });
             setSuccess('Profile updated successfully!');
-            setPhotoFile(null);
         } catch (err) {
             setError('Failed to update profile: ' + err.message);
         } finally {
@@ -120,31 +134,59 @@ const Settings = () => {
                     <div className="settings-card">
                         <h2>Profile Information</h2>
                         <form onSubmit={handleUpdateProfile}>
-                            {/* Profile Photo */}
+                            {/* Avatar Section */}
                             <div className="form-group">
-                                <label className="form-label">Profile Photo</label>
-                                <div className="photo-upload-section">
+                                <label className="form-label">Avatar</label>
+                                <div className="avatar-section">
                                     <img
-                                        src={photoPreview || 'https://via.placeholder.com/100'}
-                                        alt="Profile"
-                                        className="photo-preview"
+                                        src={selectedAvatar || currentUser?.photoURL || 'https://api.dicebear.com/7.x/avataaars/svg?seed=default'}
+                                        alt="Avatar"
+                                        className="avatar-preview-large"
                                     />
-                                    <div className="photo-upload-controls">
-                                        <input
-                                            type="file"
-                                            accept="image/*"
-                                            onChange={handlePhotoChange}
-                                            className="form-input"
-                                            id="photo-upload"
-                                        />
-                                        <label htmlFor="photo-upload" className="btn btn-secondary">
-                                            Choose Photo
-                                        </label>
-                                        {photoFile && (
-                                            <span className="text-muted">Photo selected: {photoFile.name}</span>
-                                        )}
+                                    <div className="avatar-buttons">
+                                        <button
+                                            type="button"
+                                            onClick={handleEditAvatar}
+                                            className="btn btn-secondary"
+                                            disabled={loading}
+                                        >
+                                            Edit Avatar
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={handleGenerateRandomAvatar}
+                                            className="btn btn-secondary"
+                                            disabled={loading}
+                                        >
+                                            Generate Random Avatar
+                                        </button>
                                     </div>
                                 </div>
+
+                                {/* Avatar Picker Modal */}
+                                {showAvatarPicker && (
+                                    <div className="avatar-picker">
+                                        <h3>Choose Your Avatar</h3>
+                                        <div className="avatar-grid">
+                                            {avatarOptions.map((option) => (
+                                                <div
+                                                    key={option.id}
+                                                    className="avatar-option"
+                                                    onClick={() => handleSelectAvatar(option.url)}
+                                                >
+                                                    <img src={option.url} alt={`Avatar ${option.id}`} />
+                                                </div>
+                                            ))}
+                                        </div>
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowAvatarPicker(false)}
+                                            className="btn btn-secondary"
+                                        >
+                                            Cancel
+                                        </button>
+                                    </div>
+                                )}
                             </div>
 
                             <div className="form-group">
