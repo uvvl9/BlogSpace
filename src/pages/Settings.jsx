@@ -1,11 +1,15 @@
-// Settings Page with Avatar Selection
+// Settings Page with Color-Filtered Avatar Picker
 // User account settings and profile management
 
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { updatePassword, updateProfile, deleteUser } from 'firebase/auth';
-import { generateAvatarUrl, generateAvatarOptions } from '../services/avatarService';
+import {
+    generateAvatarUrl,
+    generateColorFilteredAvatars,
+    getAvatarColors
+} from '../services/avatarService';
 import './Settings.css';
 
 const Settings = () => {
@@ -15,6 +19,7 @@ const Settings = () => {
     const [displayName, setDisplayName] = useState(currentUser?.displayName || '');
     const [showAvatarPicker, setShowAvatarPicker] = useState(false);
     const [avatarOptions, setAvatarOptions] = useState([]);
+    const [selectedColor, setSelectedColor] = useState(null);
     const [selectedAvatar, setSelectedAvatar] = useState(currentUser?.photoURL || '');
     const [newPassword, setNewPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
@@ -24,10 +29,18 @@ const Settings = () => {
     const [success, setSuccess] = useState('');
 
     const handleEditAvatar = () => {
-        // Generate 6 avatar options
-        const options = generateAvatarOptions(currentUser.email || currentUser.uid, 6);
+        // Generate avatars with no filter initially (variety pack)
+        const options = generateColorFilteredAvatars(currentUser.email || currentUser.uid, null);
         setAvatarOptions(options);
+        setSelectedColor(null);
         setShowAvatarPicker(true);
+    };
+
+    const handleColorFilter = (colorValue) => {
+        // Generate 12 avatars for selected color
+        const options = generateColorFilteredAvatars(currentUser.email || currentUser.uid, colorValue);
+        setAvatarOptions(options);
+        setSelectedColor(colorValue);
     };
 
     const handleGenerateRandomAvatar = async () => {
@@ -82,22 +95,6 @@ const Settings = () => {
         if (newPassword !== confirmPassword) {
             return setError('Passwords do not match');
         }
-
-        if (newPassword.length < 6) {
-            return setError('Password must be at least 6 characters');
-        }
-
-        setLoading(true);
-        try {
-            await updatePassword(currentUser, newPassword);
-            setSuccess('Password changed successfully!');
-            setNewPassword('');
-            setConfirmPassword('');
-        } catch (err) {
-            setError('Failed to change password. You may need to re-login: ' + err.message);
-        } finally {
-            setLoading(false);
-        }
     };
 
     const handleDeleteAccount = async () => {
@@ -139,7 +136,7 @@ const Settings = () => {
                                 <label className="form-label">Avatar</label>
                                 <div className="avatar-section">
                                     <img
-                                        src={selectedAvatar || currentUser?.photoURL || 'https://api.dicebear.com/7.x/avataaars/svg?seed=default'}
+                                        src={selectedAvatar || currentUser?.photoURL || 'https://api.dicebear.com/7.x/fun-emoji/svg?seed=default'}
                                         alt="Avatar"
                                         className="avatar-preview-large"
                                     />
@@ -167,6 +164,30 @@ const Settings = () => {
                                 {showAvatarPicker && (
                                     <div className="avatar-picker">
                                         <h3>Choose Your Avatar</h3>
+                                        <p className="picker-subtitle">Filter by color</p>
+
+                                        {/* Color Filter Buttons */}
+                                        <div className="color-filters">
+                                            <button
+                                                className={`color-filter-btn ${selectedColor === null ? 'active' : ''}`}
+                                                onClick={() => handleColorFilter(null)}
+                                                type="button"
+                                            >
+                                                All Colors
+                                            </button>
+                                            {getAvatarColors().map((color) => (
+                                                <button
+                                                    key={color.value}
+                                                    type="button"
+                                                    className={`color-filter-btn ${selectedColor === color.value ? 'active' : ''}`}
+                                                    onClick={() => handleColorFilter(color.value)}
+                                                    style={{ borderColor: `#${color.value}` }}
+                                                >
+                                                    {color.emoji} {color.name}
+                                                </button>
+                                            ))}
+                                        </div>
+
                                         <div className="avatar-grid">
                                             {avatarOptions.map((option) => (
                                                 <div

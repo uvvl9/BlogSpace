@@ -1,4 +1,4 @@
-// Post Card Component - Reddit Style
+// Post Card Component - Reddit Style with Dynamic Avatars
 // Displays blog posts with user avatar, votes, and comments
 
 import { useState, useEffect } from 'react';
@@ -89,13 +89,21 @@ const PostCard = ({ post, showActions = false, onEdit, onDelete }) => {
         return `${Math.floor(hours / 24)} day(s) ago`;
     };
 
+    // Generate avatar dynamically - use current user photo if it's their post
+    const getAvatarUrl = () => {
+        if (post.authorId === currentUser?.uid) {
+            return currentUser.photoURL || `https://api.dicebear.com/7.x/fun-emoji/svg?seed=${encodeURIComponent(post.authorName)}`;
+        }
+        return `https://api.dicebear.com/7.x/fun-emoji/svg?seed=${encodeURIComponent(post.authorName)}`;
+    };
+
     return (
         <div className="post-card-reddit">
             {/* Author Info */}
             <div className="post-header-reddit">
                 <div className="author-info">
                     <img
-                        src={post.authorPhoto || 'https://via.placeholder.com/40'}
+                        src={getAvatarUrl()}
                         alt={post.authorName}
                         className="author-avatar"
                     />
