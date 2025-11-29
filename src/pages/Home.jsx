@@ -38,7 +38,7 @@ const Home = () => {
             );
 
             // Get hot posts using Reddit algorithm
-            const hotPosts = getHotPosts(postsWithComments, 10);
+            const hotPosts = getHotPosts(postsWithComments, postsWithComments.length);
             setPosts(hotPosts);
 
             // Get trending topics
