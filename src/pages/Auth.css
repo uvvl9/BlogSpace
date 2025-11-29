@@ -149,4 +149,15 @@
     .auth-header h1 {
         font-size: var(--font-size-2xl);
     }
+}/* Remove purple gradient background in light mode */
+[data-theme="light"] .auth-container {
+    background: hsl(210, 20%, 98%) !important;
+}/* Ensure purple gradient background appears in dark mode */
+.auth-container {
+    background: radial-gradient(ellipse at top, hsl(262, 83%, 15%) 0%, var(--color-bg) 50%) !important;
+}
+
+/* Clean background for light mode */
+[data-theme="light"] .auth-container {
+    background: hsl(210, 20%, 98%) !important;
 }

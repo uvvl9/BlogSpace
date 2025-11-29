@@ -487,4 +487,104 @@
         /* Modified to target sidebar specific trending cards */
         padding: var(--space-lg);
     }
+}/* Simple fix: Make hero background match the rest of the page */
+.hero {
+    background: var(--color-bg) !important;
+}
+
+/* Make subtitle more visible on dark background */
+.hero-subtitle {
+    color: rgba(255, 255, 255, 0.85) !important;
+}/* Fix subtitle visibility for both light and dark modes */
+.hero-subtitle {
+    color: var(--color-text-secondary) !important;
+}
+
+/* Override for light mode - use darker text */
+[data-theme="light"] .hero-subtitle {
+    color: hsl(220, 10%, 40%) !important;
+}/* Ensure all gradient buttons have white text on hover for better visibility */
+.btn-primary:hover,
+.cta-card .btn:hover,
+button[style*="gradient"]:hover,
+a[style*="gradient"]:hover {
+    color: white !important;
+}
+
+/* Specifically target the CTA card button */
+.cta-card .btn {
+    color: var(--color-primary) !important;
+}
+
+.cta-card .btn:hover {
+    color: var(--color-primary-dark) !important;
+    background: rgba(255, 255, 255, 0.98) !important;
+}/* Make Create Post button match Get Started button on hover */
+.cta-card .btn {
+    background: white !important;
+    color: var(--color-primary) !important;
+    font-weight: 700;
+    border: none;
+    transition: all 0.3s ease;
+}
+
+.cta-card .btn:hover {
+    background: var(--gradient-primary) !important;
+    color: white !important;
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(168, 85, 247, 0.3);
+}/* Make Create Post button have subtle hover like Get Started - no gradient change */
+.cta-card .btn {
+    background: white !important;
+    color: var(--color-primary) !important;
+    font-weight: 700;
+    border: none;
+    transition: all 0.2s ease;
+}
+
+.cta-card .btn:hover {
+    background: rgba(255, 255, 255, 0.95) !important;
+    color: var(--color-primary) !important;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}/* Remove gradient from CTA card and make it match Trending Topics card */
+.cta-card {
+    background: var(--color-bg-card) !important;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-xl);
+    text-align: center;
+    color: var(--color-text-primary);
+}
+
+.cta-card h3 {
+    color: var(--color-text-primary) !important;
+}
+
+.cta-card p {
+    color: var(--color-text-muted) !important;
+}
+
+/* Add gradient to Create Post button */
+.cta-card .btn {
+    background: var(--gradient-primary) !important;
+    color: white !important;
+    font-weight: 700;
+    border: none;
+    transition: all 0.2s ease;
+}
+
+.cta-card .btn:hover {
+    background: linear-gradient(135deg, hsl(262, 83%, 65%) 0%, hsl(199, 89%, 55%) 100%) !important;
+    color: white !important;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(168, 85, 247, 0.3);
+}/* Restore purple gradient background for hero section in dark mode */
+.hero {
+    background: radial-gradient(ellipse at center, hsl(262, 83%, 15%) 0%, var(--color-bg) 50%) !important;
+}
+
+/* Clean background for hero section in light mode */
+[data-theme="light"] .hero {
+    background: hsl(210, 20%, 98%) !important;
 }
