@@ -35,11 +35,11 @@ const Header = () => {
                         {/* Theme Toggle Button */}
                         <button
                             onClick={toggleTheme}
-                            className="theme-toggle"
+                            className="btn btn-secondary btn-sm"
                             aria-label="Toggle theme"
                             title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
                         >
-                            {theme === 'dark' ? '☀️' : '🌙'}
+                            {theme === 'dark' ? '☀️ Light' : '🌙 Dark'}
                         </button>
 
                         {currentUser ? (
