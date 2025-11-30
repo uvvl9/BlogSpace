@@ -7,7 +7,13 @@ import {
     getDocs,
     query,
     where,
-    serverTimestamp
+    serverTimestamp,
+    updateDoc,
+    doc,
+    arrayUnion,
+    arrayRemove,
+    getDoc,
+    deleteDoc
 } from 'firebase/firestore';
 import { db } from '../firebase.config';
 
@@ -72,5 +78,48 @@ export const getCommentCount = async (postId) => {
     } catch (error) {
         console.error('Error getting comment count:', error);
         return 0;
+    }
+};
+
+// Toggle like on a comment
+export const toggleCommentLike = async (commentId, userId) => {
+    try {
+        const commentRef = doc(db, COMMENTS_COLLECTION, commentId);
+        const commentSnap = await getDoc(commentRef);
+
+        if (!commentSnap.exists()) {
+            throw new Error('Comment not found');
+        }
+
+        const likes = commentSnap.data().likes || [];
+        const isLiked = likes.includes(userId);
+
+        await updateDoc(commentRef, {
+            likes: isLiked ? arrayRemove(userId) : arrayUnion(userId)
+        });
+
+        return !isLiked;
+    } catch (error) {
+        console.error('Error toggling comment like:', error);
+        throw error;
+    }
+};
+
+// Add a reply to a comment
+export const addReply = async (postId, parentId, replyData) => {
+    return addComment(postId, {
+        ...replyData,
+        parentId
+    });
+};
+
+// Delete a comment
+export const deleteComment = async (commentId) => {
+    try {
+        await deleteDoc(doc(db, COMMENTS_COLLECTION, commentId));
+        return { success: true };
+    } catch (error) {
+        console.error('Error deleting comment:', error);
+        throw new Error('Failed to delete comment');
     }
 };
