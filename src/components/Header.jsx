@@ -25,7 +25,7 @@ const Header = () => {
             <div className="container">
                 <div className="header-content">
                     <Link to="/" className="logo">
-                        <span className="logo-icon">✍️</span>
+                        <img src="/logo.png" alt="BlogSpace" style={{ height: '40px', width: 'auto' }} />
                         <span className="logo-text text-gradient">BlogSpace</span>
                     </Link>
 
