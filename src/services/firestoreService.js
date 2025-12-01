@@ -19,6 +19,21 @@ import { db } from '../firebase.config';
 
 const POSTS_COLLECTION = 'posts';
 const USERS_COLLECTION = 'users';
+const REPORTS_COLLECTION = 'reports';
+
+// Add a new report
+export const addReport = async (reportData) => {
+    try {
+        await addDoc(collection(db, REPORTS_COLLECTION), {
+            ...reportData,
+            createdAt: serverTimestamp(),
+            status: 'open'
+        });
+    } catch (error) {
+        console.error('Error adding report:', error);
+        throw error;
+    }
+};
 
 // Sync user profile to Firestore
 export const syncUserProfile = async (user) => {

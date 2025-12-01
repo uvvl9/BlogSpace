@@ -34,7 +34,7 @@ const Header = () => {
 
                         {currentUser ? (
                             <>
-                                <Link to="/dashboard" className="nav-link">Dashboard</Link>
+                                <Link to="/dashboard" className="nav-link">Profile</Link>
                                 <Link to="/settings" className="nav-link">Settings</Link>
                                 <div className="user-menu">
                                     <img

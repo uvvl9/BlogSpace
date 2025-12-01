@@ -67,7 +67,7 @@ const Dashboard = () => {
             <div className="container">
                 <div className="dashboard-header fade-in">
                     <div>
-                        <h1>My Dashboard</h1>
+                        <h1>My Profile</h1>
                         <p className="text-muted">
                             Welcome back, {currentUser?.displayName || currentUser?.email}!
                         </p>

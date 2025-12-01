@@ -15,3 +15,19 @@
     margin: var(--space-xs) 0;
     font-size: var(--font-size-sm);
 }
+
+.footer-links {
+    margin-top: var(--space-sm);
+    font-size: var(--font-size-sm);
+}
+
+.footer-link {
+    color: var(--color-text-secondary);
+    text-decoration: none;
+    transition: color var(--transition-fast);
+}
+
+.footer-link:hover {
+    color: var(--color-primary);
+    text-decoration: underline;
+}

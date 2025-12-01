@@ -17,7 +17,7 @@ import CreatePost from './pages/CreatePost';
 import EditPost from './pages/EditPost';
 import BlogPost from './pages/BlogPost';
 import Settings from './pages/Settings';
-
+import Contact from './pages/Contact';
 import './App.css';
 
 function App() {
@@ -34,6 +34,7 @@ function App() {
                                 <Route path="/login" element={<Login />} />
                                 <Route path="/register" element={<Register />} />
                                 <Route path="/post/:postId" element={<BlogPost />} />
+                                <Route path="/contact" element={<Contact />} />
 
                                 {/* Protected Routes */}
                                 <Route
