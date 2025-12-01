@@ -22,7 +22,7 @@ import './App.css';
 
 function App() {
     return (
-        <Router>
+        <Router basename="/BlogSpace">
             <ThemeProvider>
                 <AuthProvider>
                     <div className="app">
