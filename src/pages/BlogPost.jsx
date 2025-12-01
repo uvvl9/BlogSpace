@@ -163,12 +163,10 @@ const BlogPost = () => {
         try {
             await toggleCommentLike(commentId, currentUser.uid);
             // No need to reload, we already updated optimistically
-            // But we can reload silently to ensure consistency if needed
-            // await loadPostAndComments(); 
         } catch (err) {
             console.error('Error liking comment:', err);
-            // Revert on error (optional, but good practice)
-            // await loadPostAndComments();
+            // Revert on error
+            await loadPostAndComments();
         }
     };
 
