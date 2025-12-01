@@ -123,3 +123,27 @@ export const deleteComment = async (commentId) => {
         throw new Error('Failed to delete comment');
     }
 };
+
+// Update all comments by a user with new name
+export const updateUserCommentsName = async (userId, newName) => {
+    try {
+        console.log(`Updating comments for user ${userId} to name ${newName}`);
+        const commentsQuery = query(
+            collection(db, COMMENTS_COLLECTION),
+            where('userId', '==', userId)
+        );
+        const querySnapshot = await getDocs(commentsQuery);
+        console.log(`Found ${querySnapshot.size} comments to update`);
+
+        const batchPromises = querySnapshot.docs.map(doc =>
+            updateDoc(doc.ref, { userName: newName })
+        );
+
+        await Promise.all(batchPromises);
+        console.log('All comments updated successfully');
+        return { success: true, count: batchPromises.length };
+    } catch (error) {
+        console.error('Error updating user comments name:', error);
+        throw new Error('Failed to update comments with new name.');
+    }
+};

@@ -5,6 +5,8 @@ import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { updatePassword, updateProfile, deleteUser } from 'firebase/auth';
+import { updateUserPostsAvatar, updateUserPostsName, syncUserProfile } from '../services/firestoreService';
+import { updateUserCommentsName } from '../services/commentsService';
 import {
     generateAvatarUrl,
     generateColorFilteredAvatars,
@@ -48,6 +50,11 @@ const Settings = () => {
         try {
             const randomAvatar = generateAvatarUrl(Date.now().toString());
             await updateProfile(currentUser, { photoURL: randomAvatar });
+            // Update all user's posts with new avatar
+            await updateUserPostsAvatar(currentUser.uid, randomAvatar);
+            // Sync to Firestore
+            await syncUserProfile({ ...currentUser, photoURL: randomAvatar });
+
             setSelectedAvatar(randomAvatar);
             setSuccess('Avatar updated successfully!');
         } catch (err) {
@@ -62,6 +69,11 @@ const Settings = () => {
         setLoading(true);
         try {
             await updateProfile(currentUser, { photoURL: avatarUrl });
+            // Update all user's posts with new avatar
+            await updateUserPostsAvatar(currentUser.uid, avatarUrl);
+            // Sync to Firestore
+            await syncUserProfile({ ...currentUser, photoURL: avatarUrl });
+
             setSuccess('Avatar updated successfully!');
             setShowAvatarPicker(false);
         } catch (err) {
@@ -79,6 +91,20 @@ const Settings = () => {
 
         try {
             await updateProfile(currentUser, { displayName });
+            // Sync to Firestore
+            await syncUserProfile({ ...currentUser, displayName });
+
+            // Update all user's posts with new name
+            await updateUserPostsName(currentUser.uid, displayName);
+
+            // Update all user's comments with new name (non-blocking)
+            try {
+                await updateUserCommentsName(currentUser.uid, displayName);
+            } catch (commentErr) {
+                console.error('Failed to update comments:', commentErr);
+                // We don't block the success message here, as the main profile is updated
+            }
+
             setSuccess('Profile updated successfully!');
         } catch (err) {
             setError('Failed to update profile: ' + err.message);

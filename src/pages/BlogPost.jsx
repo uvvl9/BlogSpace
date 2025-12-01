@@ -4,7 +4,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { getPost } from '../services/firestoreService';
+import { getPost, getUserProfile } from '../services/firestoreService';
 import { getComments, addComment, toggleCommentLike, addReply, deleteComment } from '../services/commentsService';
 import { upvotePost, downvotePost, removeVote } from '../services/votingService';
 import LoadingSpinner from '../components/LoadingSpinner';
@@ -24,6 +24,8 @@ const BlogPost = () => {
 
     const [voteCount, setVoteCount] = useState(0);
     const [userVote, setUserVote] = useState(null);
+
+    const [userProfiles, setUserProfiles] = useState({});
 
     useEffect(() => {
         loadPostAndComments();
@@ -45,6 +47,18 @@ const BlogPost = () => {
             ]);
             setPost(postData);
             setComments(commentsData);
+
+            // Fetch user profiles for comments
+            const userIds = [...new Set(commentsData.map(c => c.userId))];
+            const profiles = {};
+            await Promise.all(userIds.map(async (uid) => {
+                if (uid) {
+                    const profile = await getUserProfile(uid);
+                    if (profile) profiles[uid] = profile;
+                }
+            }));
+            setUserProfiles(profiles);
+
         } catch (err) {
             setError('Failed to load post');
             console.error(err);
@@ -217,7 +231,7 @@ const BlogPost = () => {
                     <div className="post-header-full">
                         <div className="author-section">
                             <img
-                                src={post.authorPhoto || 'https://via.placeholder.com/50'}
+                                src={post.authorPhoto || (currentUser?.uid === post.authorId ? currentUser.photoURL : `https://api.dicebear.com/7.x/fun-emoji/svg?seed=${encodeURIComponent(post.authorName)}`)}
                                 alt={post.authorName}
                                 className="author-avatar-large"
                             />
@@ -304,6 +318,7 @@ const BlogPost = () => {
                                         key={comment.id}
                                         comment={comment}
                                         currentUser={currentUser}
+                                        userProfiles={userProfiles}
                                         onReply={handleReply}
                                         onLike={handleLikeComment}
                                         onDelete={handleDeleteComment}
@@ -319,14 +334,19 @@ const BlogPost = () => {
     );
 };
 
-const CommentItem = ({ comment, currentUser, onReply, onLike, onDelete, formatDate }) => {
+const CommentItem = ({ comment, currentUser, userProfiles, onReply, onLike, onDelete, formatDate }) => {
     const [isReplying, setIsReplying] = useState(false);
     const [replyText, setReplyText] = useState('');
     const [showAllReplies, setShowAllReplies] = useState(false);
 
+    // Get author info from profiles map, or fall back to comment data
+    const authorProfile = userProfiles?.[comment.userId];
+    const authorName = authorProfile?.displayName || comment.userName;
+    const authorPhoto = authorProfile?.photoURL;
+
     const avatarUrl = comment.userId === currentUser?.uid
         ? currentUser.photoURL
-        : `https://api.dicebear.com/7.x/fun-emoji/svg?seed=${encodeURIComponent(comment.userName)}`;
+        : (authorPhoto || `https://api.dicebear.com/7.x/fun-emoji/svg?seed=${encodeURIComponent(authorName)}`);
 
     const handleReplySubmit = async (e) => {
         e.preventDefault();
@@ -352,12 +372,14 @@ const CommentItem = ({ comment, currentUser, onReply, onLike, onDelete, formatDa
             <div className="comment-item">
                 <img
                     src={avatarUrl || 'https://api.dicebear.com/7.x/fun-emoji/svg?seed=default'}
-                    alt={comment.userName}
+                    alt={authorName}
                     className="comment-avatar"
                 />
                 <div className="comment-content">
                     <div className="comment-header">
-                        <span className="comment-author">{comment.userName}</span>
+                        <span className="comment-author">
+                            {comment.userId === currentUser?.uid ? (currentUser.displayName || 'Anonymous') : authorName}
+                        </span>
                         <span className="comment-date">{formatDate(comment.createdAt)}</span>
                         {isOwner && (
                             <button
@@ -420,6 +442,7 @@ const CommentItem = ({ comment, currentUser, onReply, onLike, onDelete, formatDa
                             key={child.id}
                             comment={child}
                             currentUser={currentUser}
+                            userProfiles={userProfiles}
                             onReply={onReply}
                             onLike={onLike}
                             onDelete={onDelete}

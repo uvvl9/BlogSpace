@@ -89,8 +89,9 @@ const PostCard = ({ post, showActions = false, onEdit, onDelete }) => {
         return `${Math.floor(hours / 24)} day(s) ago`;
     };
 
-    // Generate avatar dynamically - use current user photo if it's their post
+    // Generate avatar dynamically - use post author photo if available, or current user photo if it's their post
     const getAvatarUrl = () => {
+        if (post.authorPhoto) return post.authorPhoto;
         if (post.authorId === currentUser?.uid) {
             return currentUser.photoURL || `https://api.dicebear.com/7.x/fun-emoji/svg?seed=${encodeURIComponent(post.authorName)}`;
         }

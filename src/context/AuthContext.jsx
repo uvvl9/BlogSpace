@@ -14,6 +14,7 @@ import {
 } from 'firebase/auth';
 import { auth } from '../firebase.config';
 import { generateAvatarUrl } from '../services/avatarService';
+import { syncUserProfile } from '../services/firestoreService';
 
 const AuthContext = createContext({});
 
@@ -45,6 +46,9 @@ export const AuthProvider = ({ children }) => {
                 photoURL
             });
 
+            // Sync to Firestore
+            await syncUserProfile(userCredential.user);
+
             return userCredential.user;
         } catch (err) {
             console.error('Registration error:', err);
@@ -74,6 +78,8 @@ export const AuthProvider = ({ children }) => {
         try {
             setError(null);
             const userCredential = await signInWithEmailAndPassword(auth, email, password);
+            // Sync to Firestore on login to ensure data is fresh
+            await syncUserProfile(userCredential.user);
             return userCredential.user;
         } catch (err) {
             console.error('Login error:', err);
@@ -107,6 +113,8 @@ export const AuthProvider = ({ children }) => {
             setError(null);
             const provider = new GoogleAuthProvider();
             const result = await signInWithPopup(auth, provider);
+            // Sync to Firestore
+            await syncUserProfile(result.user);
             return result.user;
         } catch (err) {
             console.error('Google sign-in error:', err);

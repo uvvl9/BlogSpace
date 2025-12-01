@@ -44,7 +44,8 @@ const CreatePost = () => {
                 content: formData.content.trim(),
                 category: formData.category,
                 authorId: currentUser.uid,
-                authorName: currentUser.displayName || currentUser.email
+                authorName: currentUser.displayName || currentUser.email,
+                authorPhoto: currentUser.photoURL
             });
 
             navigate('/dashboard');

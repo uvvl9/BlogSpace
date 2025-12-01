@@ -32,21 +32,17 @@ const Header = () => {
                     <nav className="nav">
                         <Link to="/" className="nav-link">Home</Link>
 
-                        {/* Theme Toggle Button */}
-                        <button
-                            onClick={toggleTheme}
-                            className="btn btn-secondary btn-sm"
-                            aria-label="Toggle theme"
-                            title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
-                        >
-                            {theme === 'dark' ? '☀️ Light' : '🌙 Dark'}
-                        </button>
-
                         {currentUser ? (
                             <>
                                 <Link to="/dashboard" className="nav-link">Dashboard</Link>
                                 <Link to="/settings" className="nav-link">Settings</Link>
                                 <div className="user-menu">
+                                    <img
+                                        src={currentUser.photoURL || `https://api.dicebear.com/7.x/fun-emoji/svg?seed=${encodeURIComponent(currentUser.displayName || currentUser.email)}`}
+                                        alt={currentUser.displayName || currentUser.email}
+                                        className="user-avatar-header"
+                                        style={{ width: '32px', height: '32px', borderRadius: '50%', marginRight: '8px' }}
+                                    />
                                     <span className="user-name">{currentUser.displayName || currentUser.email}</span>
                                     <button onClick={handleLogout} className="btn btn-secondary btn-sm">
                                         Logout
@@ -59,6 +55,16 @@ const Header = () => {
                                 <Link to="/register" className="btn btn-primary btn-sm">Sign Up</Link>
                             </>
                         )}
+
+                        {/* Theme Toggle Button */}
+                        <button
+                            onClick={toggleTheme}
+                            className="btn btn-secondary btn-sm"
+                            aria-label="Toggle theme"
+                            title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+                        >
+                            {theme === 'dark' ? '☀️ Light' : '🌙 Dark'}
+                        </button>
                     </nav>
                 </div>
             </div>
