@@ -10,11 +10,14 @@ import { getTrendingTopics, getHotPosts } from '../services/trendingService';
 import PostCard from '../components/PostCard';
 import LoadingSpinner from '../components/LoadingSpinner';
 import './Home.css';
+import './Home-active.css';
 
 const Home = () => {
     const { currentUser } = useAuth();
-    const [posts, setPosts] = useState([]);
-    const [trendingTopics, setTrendingTopics] = useState([]);
+    const [allPosts, setAllPosts] = useState([]); // Store all posts
+    const [posts, setPosts] = useState([]); // Filtered posts to display
+    const [allCategories, setAllCategories] = useState([]); // All unique categories
+    const [selectedCategory, setSelectedCategory] = useState(null); // Current filter
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
 
@@ -22,28 +25,62 @@ const Home = () => {
         fetchData();
     }, []);
 
+    useEffect(() => {
+        // Filter posts when category changes
+        if (selectedCategory === null) {
+            // Show all posts
+            const hotPosts = getHotPosts(allPosts, allPosts.length);
+            setPosts(hotPosts);
+        } else {
+            // Show only posts from selected category
+            const filtered = allPosts.filter(post => post.category === selectedCategory);
+            const hotPosts = getHotPosts(filtered, filtered.length);
+            setPosts(hotPosts);
+        }
+    }, [selectedCategory, allPosts]);
+
     const fetchData = async () => {
         try {
             setLoading(true);
 
             // Fetch all posts from Firestore
-            const allPosts = await getPosts();
+            const fetchedPosts = await getPosts();
 
             // Add comment counts to posts
             const postsWithComments = await Promise.all(
-                allPosts.map(async (post) => ({
+                fetchedPosts.map(async (post) => ({
                     ...post,
                     commentCount: await getCommentCount(post.id)
                 }))
             );
 
+            setAllPosts(postsWithComments);
+
+            // Calculate engagement for each category and sort by it (like Twitter)
+            const categoriesMap = {};
+            postsWithComments.forEach(post => {
+                if (post.category) {
+                    if (!categoriesMap[post.category]) {
+                        categoriesMap[post.category] = {
+                            category: post.category,
+                            engagement: 0
+                        };
+                    }
+                    // Add votes and comments to engagement score
+                    categoriesMap[post.category].engagement += (post.voteCount || 0) + (post.commentCount || 0);
+                }
+            });
+
+            // Convert to array and sort by engagement (highest first)
+            const sortedCategories = Object.values(categoriesMap)
+                .sort((a, b) => b.engagement - a.engagement)
+                .map(item => item.category);
+
+            setAllCategories(sortedCategories);
+
             // Get hot posts using Reddit algorithm
             const hotPosts = getHotPosts(postsWithComments, postsWithComments.length);
             setPosts(hotPosts);
-
-            // Get trending topics
-            const trending = getTrendingTopics(postsWithComments);
-            setTrendingTopics(trending.slice(0, 5));
 
         } catch (err) {
             console.error('Error fetching data:', err);
@@ -122,26 +159,60 @@ const Home = () => {
                                 <h3>📈 Trending Topics</h3>
                                 <p className="text-muted">Hot categories right now</p>
 
-                                {trendingTopics.length > 0 ? (
+                                {allCategories.length > 0 ? (
                                     <div className="trending-list">
-                                        {trendingTopics.map((topic, index) => (
-                                            <div key={topic.category} className="trending-item">
-                                                <div className="trending-rank">
-                                                    {index + 1}
-                                                </div>
-                                                <div className="trending-info">
-                                                    <h4>r/{topic.category}</h4>
-                                                    <div className="trending-stats">
-                                                        <span>{topic.postCount} posts</span>
-                                                        <span>•</span>
-                                                        <span>{topic.totalVotes + topic.totalComments} engagement</span>
-                                                    </div>
-                                                </div>
-                                                <div className="trending-arrow">
-                                                    {topic.trendingScore > 5 ? '🔥' : '📈'}
+                                        {/* All option */}
+                                        <div
+                                            className={`trending-item ${selectedCategory === null ? 'active' : ''}`}
+                                            onClick={() => setSelectedCategory(null)}
+                                            style={{ cursor: 'pointer' }}
+                                        >
+                                            <div className="trending-rank">
+                                                🌐
+                                            </div>
+                                            <div className="trending-info">
+                                                <h4>r/All</h4>
+                                                <div className="trending-stats">
+                                                    <span>{allPosts.length} posts</span>
                                                 </div>
                                             </div>
-                                        ))}
+                                            <div className="trending-arrow">
+                                                📈
+                                            </div>
+                                        </div>
+
+                                        {/* Category options */}
+                                        {allCategories.map((category, index) => {
+                                            const categoryPosts = allPosts.filter(p => p.category === category);
+                                            const postCount = categoryPosts.length;
+                                            const engagement = categoryPosts.reduce((sum, p) =>
+                                                sum + (p.voteCount || 0) + (p.commentCount || 0), 0
+                                            );
+
+                                            return (
+                                                <div
+                                                    key={category}
+                                                    className={`trending-item ${selectedCategory === category ? 'active' : ''}`}
+                                                    onClick={() => setSelectedCategory(category)}
+                                                    style={{ cursor: 'pointer' }}
+                                                >
+                                                    <div className="trending-rank">
+                                                        {index + 1}
+                                                    </div>
+                                                    <div className="trending-info">
+                                                        <h4>r/{category}</h4>
+                                                        <div className="trending-stats">
+                                                            <span>{postCount} posts</span>
+                                                            <span>•</span>
+                                                            <span>{engagement} engagement</span>
+                                                        </div>
+                                                    </div>
+                                                    <div className="trending-arrow">
+                                                        {index === 0 ? '🔥' : '📈'}
+                                                    </div>
+                                                </div>
+                                            );
+                                        })}
                                     </div>
                                 ) : (
                                     <p className="empty-trending">No trending topics yet</p>

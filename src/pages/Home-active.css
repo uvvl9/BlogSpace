@@ -1,0 +1,18 @@
+/* Active category state for trending topics filtering */
+.trending-item.active {
+    background: var(--color-primary);
+    color: white;
+}
+
+.trending-item.active .trending-info h4 {
+    color: white;
+}
+
+.trending-item.active .trending-stats {
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.trending-item.active .trending-rank {
+    background: white;
+    color: var(--color-primary);
+}

@@ -121,6 +121,26 @@ const Settings = () => {
         if (newPassword !== confirmPassword) {
             return setError('Passwords do not match');
         }
+
+        if (newPassword.length < 6) {
+            return setError('Password must be at least 6 characters');
+        }
+
+        setLoading(true);
+        try {
+            await updatePassword(currentUser, newPassword);
+            setNewPassword('');
+            setConfirmPassword('');
+            setSuccess('Password changed successfully!');
+        } catch (err) {
+            if (err.code === 'auth/requires-recent-login') {
+                setError('For security, please log out and log back in before changing your password');
+            } else {
+                setError('Failed to change password: ' + err.message);
+            }
+        } finally {
+            setLoading(false);
+        }
     };
 
     const handleDeleteAccount = async () => {

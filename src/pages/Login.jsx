@@ -4,6 +4,8 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { sendPasswordResetEmail } from 'firebase/auth';
+import { auth } from '../firebase.config';
 import './Auth.css';
 
 const Login = () => {
@@ -11,6 +13,7 @@ const Login = () => {
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
+    const [resetEmailSent, setResetEmailSent] = useState(false);
 
     const { login, signInWithGoogle } = useAuth();
     const navigate = useNavigate();
@@ -48,6 +51,24 @@ const Login = () => {
         }
     };
 
+    const handleForgotPassword = async () => {
+        if (!email) {
+            setError('Please enter your email address');
+            return;
+        }
+
+        try {
+            setError('');
+            setLoading(true);
+            await sendPasswordResetEmail(auth, email);
+            setResetEmailSent(true);
+        } catch (err) {
+            setError(err.message || 'Failed to send password reset email');
+        } finally {
+            setLoading(false);
+        }
+    };
+
     return (
         <div className="auth-container">
             <div className="auth-card fade-in">
@@ -59,6 +80,12 @@ const Login = () => {
                 {error && (
                     <div className="alert alert-error">
                         {error}
+                    </div>
+                )}
+
+                {resetEmailSent && (
+                    <div className="alert alert-success">
+                        Password reset email sent! Check your inbox (and spam folder).
                     </div>
                 )}
 
@@ -107,6 +134,17 @@ const Login = () => {
                             placeholder="••••••••"
                             disabled={loading}
                         />
+                        <div style={{ textAlign: 'right', marginTop: '0.5rem' }}>
+                            <button
+                                type="button"
+                                onClick={handleForgotPassword}
+                                className="auth-link"
+                                disabled={loading}
+                                style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', fontSize: '0.875rem' }}
+                            >
+                                Forgot password?
+                            </button>
+                        </div>
                     </div>
 
                     <button
