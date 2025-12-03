@@ -2,7 +2,7 @@
 // Landing page with featured posts and trending topics
 
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { getPosts } from '../services/firestoreService';
 import { getCommentCount } from '../services/commentsService';
@@ -14,11 +14,15 @@ import './Home-active.css';
 
 const Home = () => {
     const { currentUser } = useAuth();
+    const [searchParams, setSearchParams] = useSearchParams();
+    const searchQuery = searchParams.get('search') || '';
+
     const [allPosts, setAllPosts] = useState([]); // Store all posts
     const [posts, setPosts] = useState([]); // Filtered posts to display
     const [allCategories, setAllCategories] = useState([]); // All unique categories
     const [selectedCategory, setSelectedCategory] = useState(null); // Current filter
     const [loading, setLoading] = useState(true);
+    const [searching, setSearching] = useState(false);
     const [error, setError] = useState('');
 
     useEffect(() => {
@@ -26,18 +30,32 @@ const Home = () => {
     }, []);
 
     useEffect(() => {
-        // Filter posts when category changes
-        if (selectedCategory === null) {
-            // Show all posts
-            const hotPosts = getHotPosts(allPosts, allPosts.length);
-            setPosts(hotPosts);
-        } else {
-            // Show only posts from selected category
-            const filtered = allPosts.filter(post => post.category === selectedCategory);
-            const hotPosts = getHotPosts(filtered, filtered.length);
-            setPosts(hotPosts);
+        // Filter posts when category or search changes
+        setSearching(true);
+
+        let filteredPosts = allPosts;
+
+        // Apply search filter
+        if (searchQuery.trim()) {
+            const query = searchQuery.toLowerCase();
+            filteredPosts = filteredPosts.filter(post => {
+                const titleMatch = post.title?.toLowerCase().includes(query);
+                const contentMatch = post.content?.toLowerCase().includes(query);
+                const authorMatch = post.authorName?.toLowerCase().includes(query);
+                return titleMatch || contentMatch || authorMatch;
+            });
         }
-    }, [selectedCategory, allPosts]);
+
+        // Apply category filter
+        if (selectedCategory !== null) {
+            filteredPosts = filteredPosts.filter(post => post.category === selectedCategory);
+        }
+
+        // Sort by hot algorithm
+        const hotPosts = getHotPosts(filteredPosts, filteredPosts.length);
+        setPosts(hotPosts);
+        setSearching(false);
+    }, [selectedCategory, allPosts, searchQuery]);
 
     const fetchData = async () => {
         try {
@@ -128,20 +146,58 @@ const Home = () => {
                         {/* Main Feed */}
                         <div className="main-feed">
                             <div className="section-header">
-                                <h2>🔥 Hot Posts</h2>
-                                <p className="text-muted">Top posts based on votes, comments, and recency</p>
+                                {searchQuery ? (
+                                    <>
+                                        <h2>🔍 Search Results</h2>
+                                        <p className="text-muted">
+                                            Showing results for "{searchQuery}"
+                                            <button
+                                                onClick={() => setSearchParams({})}
+                                                className="btn btn-secondary btn-sm"
+                                                style={{ marginLeft: '1rem' }}
+                                            >
+                                                Clear Search
+                                            </button>
+                                        </p>
+                                    </>
+                                ) : (
+                                    <>
+                                        <h2>🔥 Hot Posts</h2>
+                                        <p className="text-muted">Top posts based on votes, comments, and recency</p>
+                                    </>
+                                )}
                             </div>
 
                             {error && <div className="alert alert-error">{error}</div>}
 
-                            {posts.length === 0 ? (
+                            {searching ? (
+                                <div className="loading-state" style={{ textAlign: 'center', padding: '3rem' }}>
+                                    <div className="spinner" style={{ margin: '0 auto 1rem' }}></div>
+                                    <p>Searching posts...</p>
+                                </div>
+                            ) : posts.length === 0 ? (
                                 <div className="empty-state">
-                                    <h3>No posts yet</h3>
-                                    <p>Be the first to share something!</p>
-                                    {currentUser && (
-                                        <Link to="/create-post" className="btn btn-primary">
-                                            Create Post
-                                        </Link>
+                                    {searchQuery ? (
+                                        <>
+                                            <h3>No results found</h3>
+                                            <p>No posts match your search for "{searchQuery}"</p>
+                                            <button
+                                                onClick={() => setSearchParams({})}
+                                                className="btn btn-primary"
+                                            >
+                                                Clear Search
+                                            </button>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <h3>No posts yet</h3>
+                                            <p>Be the first to share something!</p>
+                                            {currentUser && (
+                                                <Link to="/create-post" className="btn btn-primary">
+                                                    Create Post
+                                                </Link>
+                                            )}
+                                        </>
                                     )}
                                 </div>
                             ) : (

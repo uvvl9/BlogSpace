@@ -1,6 +1,7 @@
 // Header Navigation Component
 // Global navigation with user menu and authentication state
 
+import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
@@ -10,6 +11,7 @@ const Header = () => {
     const { currentUser, logout } = useAuth();
     const { theme, toggleTheme } = useTheme();
     const navigate = useNavigate();
+    const [searchQuery, setSearchQuery] = useState('');
 
     const handleLogout = async () => {
         try {
@@ -20,6 +22,19 @@ const Header = () => {
         }
     };
 
+    const handleSearch = (e) => {
+        e.preventDefault();
+        if (searchQuery.trim()) {
+            navigate(`/?search=${encodeURIComponent(searchQuery.trim())}`);
+        } else {
+            navigate('/');
+        }
+    };
+
+    const handleSearchChange = (e) => {
+        setSearchQuery(e.target.value);
+    };
+
     return (
         <header className="header">
             <div className="container">
@@ -28,6 +43,22 @@ const Header = () => {
                         <img src={`${import.meta.env.BASE_URL}logo.png`} alt="BlogSpace" style={{ height: '40px', width: 'auto' }} />
                         <span className="logo-text text-gradient">BlogSpace</span>
                     </Link>
+
+                    {/* Search Bar */}
+                    <form onSubmit={handleSearch} className="search-form">
+                        <div className="search-container">
+                            <input
+                                type="text"
+                                placeholder="Search posts..."
+                                value={searchQuery}
+                                onChange={handleSearchChange}
+                                className="search-input"
+                            />
+                            <button type="submit" className="search-button" aria-label="Search">
+                                🔍
+                            </button>
+                        </div>
+                    </form>
 
                     <nav className="nav">
                         <Link to="/" className="nav-link">Home</Link>
