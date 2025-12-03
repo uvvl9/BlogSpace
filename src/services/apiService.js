@@ -55,18 +55,23 @@ const cacheNews = (data) => {
     }
 };
 
+// CORS Proxy for APIs that don't support CORS on free tier
+const CORS_PROXY = 'https://api.allorigins.win/raw?url=';
+
 // Fetch from GNews API
 const fetchFromGNews = async (limit) => {
-    const response = await axios.get(`${GNEWS_API_BASE_URL}/top-headlines`, {
-        params: {
-            category: 'general',
-            lang: 'en',
-            country: 'us',
-            max: limit,
-            apikey: GNEWS_API_KEY
-        }
-    });
-    return response.data.articles;
+    // Use CORS proxy for GitHub Pages deployment
+    const apiUrl = `${GNEWS_API_BASE_URL}/top-headlines?category=general&lang=en&country=us&max=${limit}&apikey=${GNEWS_API_KEY}`;
+    const proxiedUrl = `${CORS_PROXY}${encodeURIComponent(apiUrl)}`;
+
+    const response = await axios.get(proxiedUrl);
+    const data = typeof response.data === 'string' ? JSON.parse(response.data) : response.data;
+
+    if (!data.articles || data.articles.length === 0) {
+        throw new Error('No news articles returned from GNews');
+    }
+
+    return data.articles;
 };
 
 // Fetch from NewsData.io API
@@ -80,14 +85,19 @@ const fetchFromNewsData = async (limit) => {
             size: limit
         }
     });
+
     // Normalize the response to match GNews format
+    if (!response.data.results || response.data.results.length === 0) {
+        throw new Error('No news articles returned from NewsData.io');
+    }
+
     return response.data.results.map(article => ({
-        title: article.title,
-        description: article.description,
-        url: article.link,
-        source: { name: article.source_id },
-        publishedAt: article.pubDate,
-        image: article.image_url
+        title: article.title || 'No title available',
+        description: article.description || article.content || 'No description available',
+        url: article.link || '#',
+        source: { name: article.source_id || 'Unknown Source' },
+        publishedAt: article.pubDate || new Date().toISOString(),
+        image: article.image_url || null
     }));
 };
 
