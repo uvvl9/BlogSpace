@@ -1,20 +1,22 @@
 // External API Service
-// Integrates with News API and Quotable API
+// Integrates with GNews API and Quotable API
 
 import axios from 'axios';
 
-const NEWS_API_KEY = import.meta.env.VITE_NEWS_API_KEY;
-const NEWS_API_BASE_URL = 'https://newsapi.org/v2';
+const GNEWS_API_KEY = import.meta.env.VITE_GNEWS_API_KEY || 'e1bad32da5ddb4b6a13f4cb44298d657';
+const GNEWS_API_BASE_URL = 'https://gnews.io/api/v4';
 const QUOTABLE_API_BASE_URL = 'https://api.quotable.io';
 
 // Fetch trending news articles
 export const fetchTrendingNews = async (limit = 5) => {
     try {
-        const response = await axios.get(`${NEWS_API_BASE_URL}/top-headlines`, {
+        const response = await axios.get(`${GNEWS_API_BASE_URL}/top-headlines`, {
             params: {
+                category: 'general',
+                lang: 'en',
                 country: 'us',
-                pageSize: limit,
-                apiKey: NEWS_API_KEY
+                max: limit,
+                apikey: GNEWS_API_KEY
             }
         });
         return response.data.articles;
