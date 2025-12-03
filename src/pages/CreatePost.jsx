@@ -1,13 +1,17 @@
 // Create Post Page
 // Protected page for creating new blog posts
 
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { createPost } from '../services/firestoreService';
 import './PostForm.css';
 
 const CreatePost = () => {
+    const { currentUser } = useAuth();
+    const navigate = useNavigate();
+    const location = useLocation();
+
     const [formData, setFormData] = useState({
         title: '',
         content: '',
@@ -16,8 +20,16 @@ const CreatePost = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
 
-    const { currentUser } = useAuth();
-    const navigate = useNavigate();
+    // Load prefilled content from navigation state
+    useEffect(() => {
+        if (location.state?.prefilledTitle || location.state?.prefilledContent) {
+            setFormData({
+                title: location.state.prefilledTitle || '',
+                content: location.state.prefilledContent || '',
+                category: 'General'
+            });
+        }
+    }, [location.state]);
 
     const handleChange = (e) => {
         setFormData({

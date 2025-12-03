@@ -8,6 +8,8 @@ import { getPosts } from '../services/firestoreService';
 import { getCommentCount } from '../services/commentsService';
 import { getTrendingTopics, getHotPosts } from '../services/trendingService';
 import PostCard from '../components/PostCard';
+import QuoteWidget from '../components/QuoteWidget';
+import NewsWidget from '../components/NewsWidget';
 import LoadingSpinner from '../components/LoadingSpinner';
 import './Home.css';
 import './Home-active.css';
@@ -211,6 +213,7 @@ const Home = () => {
 
                         {/* Trending Topics Sidebar */}
                         <aside className="trending-sidebar">
+                            {/* 1. Trending Topics - First */}
                             <div className="trending-card">
                                 <h3>📈 Trending Topics</h3>
                                 <p className="text-muted">Hot categories right now</p>
@@ -275,7 +278,7 @@ const Home = () => {
                                 )}
                             </div>
 
-                            {/* Create Post CTA */}
+                            {/* 2. Create Post CTA - Second */}
                             {currentUser && (
                                 <div className="cta-card">
                                     <h3>Share Your Story</h3>
@@ -285,6 +288,12 @@ const Home = () => {
                                     </Link>
                                 </div>
                             )}
+
+                            {/* 3. Quote Widget - Third */}
+                            <QuoteWidget />
+
+                            {/* 4. News Widget - Fourth */}
+                            <NewsWidget />
                         </aside>
                     </div>
                 </div>
